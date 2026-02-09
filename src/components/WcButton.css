@@ -1,0 +1,28 @@
+.wc-button {
+  position: fixed;
+  top: calc(var(--spacing-sm) + env(safe-area-inset-top));
+  left: calc(var(--spacing-sm) + env(safe-area-inset-left));
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--min-tap-height);
+  min-width: var(--min-tap-height);
+  padding: 0 var(--spacing-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary-text);
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.wc-button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.wc-button:active {
+  transform: scale(0.98);
+}
