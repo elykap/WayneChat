@@ -6,6 +6,62 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Touch and layout */
+  --min-tap-height: 44px;
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 2.5rem;
+  --radius: 8px;
+  --form-max-width: 400px;
+
+  /* Site palette */
+  --site-green-50: #cedddb;
+  --site-green-100: #9ebbb6;
+  --site-green-200: #6d9892;
+  --site-green-300: #3d766d;
+  --site-green: #0c5449;
+  --site-green-500: #0b4a40;
+  --site-green-600: #094038;
+  --site-green-700: #08352f;
+  --site-green-800: #062b27;
+  --site-green-900: #05211e;
+  --site-gold-50: #fff5d6;
+  --site-gold-100: #ffebad;
+  --site-gold-200: #ffe085;
+  --site-gold-300: #ffd65c;
+  --site-gold: #ffcc33;
+  --site-gold-500: #edbd2c;
+  --site-gold-600: #dbae25;
+  --site-gold-700: #c89f1f;
+  --site-gold-800: #b69018;
+  --site-gold-900: #a48111;
+  --site-gray-50: #fafafa;
+  --site-gray-100: #f4f4f5;
+  --site-gray-200: #e4e4e7;
+  --site-gray-300: #d4d4d8;
+  --site-gray: #a1a1aa;
+  --site-gray-500: #71717a;
+  --site-gray-600: #52525b;
+  --site-gray-700: #3f3f46;
+  --site-gray-800: #27272a;
+  --site-gray-900: #18181b;
+  --site-gray-400: var(--site-gray);
+
+  /* Colors - light (site palette) */
+  --color-bg: var(--site-gray-50);
+  --color-surface: #ffffff;
+  --color-text: var(--site-gray-900);
+  --color-text-muted: var(--site-gray-600);
+  --color-text-footer: var(--site-gray-500);
+  --color-primary: var(--site-green);
+  --color-primary-hover: var(--site-green-600);
+  --color-primary-text: #ffffff;
+  --color-border: var(--site-gray-200);
+  --color-input-bg: #ffffff;
+  --color-input-border: var(--site-gray-300);
 }
 
 *,
@@ -18,18 +74,66 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--color-text);
+  background-color: var(--color-bg);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #1a1a1a;
-    background-color: #fafafa;
-  }
+/* Full-screen page layout: 100dvh, safe areas, flex column */
+.page-full {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md);
+  padding-top: calc(var(--spacing-md) + env(safe-area-inset-top));
+  padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom));
+  padding-left: calc(var(--spacing-md) + env(safe-area-inset-left));
+  padding-right: calc(var(--spacing-md) + env(safe-area-inset-right));
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    color: #f0f0f0;
-    background-color: #121212;
+  :root:not([data-theme]) {
+    --color-bg: var(--site-gray-900);
+    --color-surface: var(--site-gray-800);
+    --color-text: var(--site-gray-50);
+    --color-text-muted: var(--site-gray-400);
+    --color-text-footer: var(--site-gray-500);
+    --color-primary: var(--site-gold);
+    --color-primary-hover: var(--site-gold-300);
+    --color-primary-text: var(--site-gray-900);
+    --color-border: var(--site-gray-700);
+    --color-input-bg: var(--site-gray-800);
+    --color-input-border: var(--site-gray-600);
   }
+}
+
+/* Manual theme override (when user toggles) */
+[data-theme="light"] {
+  --color-bg: var(--site-gray-50);
+  --color-surface: #ffffff;
+  --color-text: var(--site-gray-900);
+  --color-text-muted: var(--site-gray-600);
+  --color-text-footer: var(--site-gray-500);
+  --color-primary: var(--site-green);
+  --color-primary-hover: var(--site-green-600);
+  --color-primary-text: #ffffff;
+  --color-border: var(--site-gray-200);
+  --color-input-bg: #ffffff;
+  --color-input-border: var(--site-gray-300);
+}
+
+[data-theme="dark"] {
+  --color-bg: var(--site-gray-900);
+  --color-surface: var(--site-gray-800);
+  --color-text: var(--site-gray-50);
+  --color-text-muted: var(--site-gray-400);
+  --color-text-footer: var(--site-gray-500);
+  --color-primary: var(--site-gold);
+  --color-primary-hover: var(--site-gold-300);
+  --color-primary-text: var(--site-gray-900);
+  --color-border: var(--site-gray-700);
+  --color-input-bg: var(--site-gray-800);
+  --color-input-border: var(--site-gray-600);
 }
