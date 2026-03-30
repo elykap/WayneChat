@@ -1,13 +1,24 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import './SplashPage.css'
 
 function SplashPage() {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return null
+  }
+
+  if (user) {
+    return <Navigate to="/home" replace />
+  }
+
   return (
     <div className="splash">
       <main className="splash__main">
         <h1 className="splash__title">WayneChat</h1>
         <p className="splash__tagline">
-          Anonymous chat for verified WSU students and faculty
+          Anonymous chat for verified students and faculty
         </p>
         <div className="splash__actions">
           <Link to="/login" className="splash__cta">

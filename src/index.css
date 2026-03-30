@@ -7,7 +7,6 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Touch and layout */
   --min-tap-height: 44px;
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
@@ -17,7 +16,6 @@
   --radius: 8px;
   --form-max-width: 400px;
 
-  /* Site palette */
   --site-green-50: #cedddb;
   --site-green-100: #9ebbb6;
   --site-green-200: #6d9892;
@@ -50,7 +48,6 @@
   --site-gray-900: #18181b;
   --site-gray-400: var(--site-gray);
 
-  /* Colors - light (site palette) */
   --color-bg: var(--site-gray-50);
   --color-surface: #ffffff;
   --color-text: var(--site-gray-900);
@@ -79,7 +76,17 @@ body {
   background-color: var(--color-bg);
 }
 
-/* Full-screen page layout: 100dvh, safe areas, flex column */
+.app-status {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.app-loading-screen {
+  padding: var(--spacing-md);
+  padding-top: calc(var(--spacing-md) + env(safe-area-inset-top));
+}
+
 .page-full {
   min-height: 100vh;
   min-height: 100dvh;
@@ -109,7 +116,6 @@ body {
   }
 }
 
-/* Manual theme override (when user toggles) */
 [data-theme="light"] {
   --color-bg: var(--site-gray-50);
   --color-surface: #ffffff;

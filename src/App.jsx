@@ -2,14 +2,19 @@ import { Routes, Route } from 'react-router-dom'
 import WcButton from './components/WcButton'
 import ThemeToggle from './components/ThemeToggle'
 import Layout from './components/Layout'
+import ProtectedRoute from './components/ProtectedRoute'
+import { AuthProvider } from './context/AuthContext'
 import SplashPage from './pages/SplashPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import LegalPage from './pages/LegalPage'
+import HomePage from './pages/HomePage'
+import CommunityPage from './pages/CommunityPage'
+import PostPage from './pages/PostPage'
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <WcButton />
       <ThemeToggle />
       <Routes>
@@ -18,9 +23,33 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/legal" element={<LegalPage />} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/c/:slug"
+            element={
+              <ProtectedRoute>
+                <CommunityPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/p/:postId"
+            element={
+              <ProtectedRoute>
+                <PostPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
-    </>
+    </AuthProvider>
   )
 }
 

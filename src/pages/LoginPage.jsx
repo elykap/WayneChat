@@ -1,13 +1,36 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabaseClient'
 import './LoginPage.css'
 
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
+  const location = useLocation()
+  const successMessage = location.state?.message
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    // Placeholder: no backend yet
+    setError('')
+    setSubmitting(true)
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    })
+
+    setSubmitting(false)
+
+    if (signInError) {
+      setError(signInError.message)
+      return
+    }
+
+    navigate('/home')
   }
 
   return (
@@ -17,6 +40,8 @@ function LoginPage() {
       </div>
       <main className="login__main">
         <form className="login__form" onSubmit={handleSubmit} noValidate>
+          {successMessage ? <p className="login__switch">{successMessage}</p> : null}
+          {error ? <p className="login__switch">{error}</p> : null}
           <label className="login__label" htmlFor="login-email">
             Email
           </label>
@@ -28,6 +53,9 @@ function LoginPage() {
             placeholder="you@school.edu"
             autoComplete="email"
             autoCapitalize="off"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
           />
           <label className="login__label" htmlFor="login-password">
             Password
@@ -40,6 +68,9 @@ function LoginPage() {
               className="login__input"
               placeholder="••••••••"
               autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
             <button
               type="button"
@@ -50,8 +81,8 @@ function LoginPage() {
               {showPassword ? 'Hide' : 'Show'}
             </button>
           </div>
-          <button type="submit" className="login__submit">
-            Log in
+          <button type="submit" className="login__submit" disabled={submitting}>
+            {submitting ? 'Logging in...' : 'Log in'}
           </button>
           <a href="#" className="login__forgot" onClick={(e) => e.preventDefault()}>
             Forgot password?
