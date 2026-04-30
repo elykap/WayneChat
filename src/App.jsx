@@ -1,8 +1,8 @@
 import { Routes, Route } from 'react-router-dom'
 import WcButton from './components/WcButton'
-import ThemeToggle from './components/ThemeToggle'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import ModeratorRoute from './components/ModeratorRoute'
 import { AuthProvider } from './context/AuthContext'
 import SplashPage from './pages/SplashPage'
 import LoginPage from './pages/LoginPage'
@@ -11,12 +11,12 @@ import LegalPage from './pages/LegalPage'
 import HomePage from './pages/HomePage'
 import CommunityPage from './pages/CommunityPage'
 import PostPage from './pages/PostPage'
+import ModerationPage from './pages/ModerationPage'
 
 function App() {
   return (
     <AuthProvider>
       <WcButton />
-      <ThemeToggle />
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<SplashPage />} />
@@ -44,6 +44,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <PostPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/moderation"
+            element={
+              <ProtectedRoute>
+                <ModeratorRoute>
+                  <ModerationPage />
+                </ModeratorRoute>
               </ProtectedRoute>
             }
           />

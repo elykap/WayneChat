@@ -80,6 +80,16 @@
   color: var(--color-text-muted);
 }
 
+.community__label--search {
+  margin-top: var(--spacing-xs);
+}
+
+.community__search {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: var(--spacing-sm);
+}
+
 .community__input,
 .community__textarea {
   min-height: var(--min-tap-height);

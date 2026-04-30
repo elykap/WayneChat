@@ -3,6 +3,7 @@ create extension if not exists "pgcrypto";
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   display_name text not null,
+  role text not null default 'user' check (role in ('user', 'moderator')),
   created_at timestamptz not null default now()
 );
 
@@ -188,3 +189,13 @@ with check
   (reporter_id = (select auth.uid ()));
 
 create policy "reports_select_own" on public.reports for select to authenticated using (reporter_id = (select auth.uid ()));
+
+create policy "reports_select_moderator" on public.reports for select to authenticated using (
+  exists (
+    select 1
+    from public.profiles p
+    where
+      p.id = (select auth.uid ())
+      and p.role = 'moderator'
+  )
+);
