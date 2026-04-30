@@ -143,3 +143,18 @@ body {
   --color-input-bg: var(--site-gray-800);
   --color-input-border: var(--site-gray-600);
 }
+
+.wc-button,
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--min-tap-height);
+  min-width: var(--min-tap-height);
+  border-radius: 9999px;
+}
+
+.wc-button:active,
+.theme-toggle:active {
+  transform: scale(0.98);
+}

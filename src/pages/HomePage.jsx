@@ -1,16 +1,18 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import ThemeToggle from '../components/ThemeToggle'
 import { supabase } from '../lib/supabaseClient'
 import './HomePage.css'
 
 function HomePage() {
   const navigate = useNavigate()
-  const { signOut, user } = useAuth()
+  const { signOut, user, profile, profileLoading } = useAuth()
   const [communities, setCommunities] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [retrying, setRetrying] = useState(false)
+  const [communitySearchQuery, setCommunitySearchQuery] = useState('')
 
   const loadCommunities = useCallback(async () => {
     setLoading(true)
@@ -46,6 +48,18 @@ function HomePage() {
     navigate('/login')
   }
 
+  const filteredCommunities = useMemo(() => {
+    const q = communitySearchQuery.trim().toLowerCase()
+    if (!q) return communities
+    return communities.filter((c) => {
+      const name = (c.name ?? '').toLowerCase()
+      const desc = (c.description ?? '').toLowerCase()
+      return name.includes(q) || desc.includes(q)
+    })
+  }, [communities, communitySearchQuery])
+
+  const showModerationLink = !profileLoading && profile?.role === 'moderator'
+
   return (
     <div className="home">
       <header className="home__header">
@@ -55,9 +69,17 @@ function HomePage() {
             Signed in as {user?.email}
           </p>
         </div>
-        <button type="button" className="home__logout" onClick={handleLogout}>
-          Log out
-        </button>
+        <div className="home__header-actions">
+          {showModerationLink ? (
+            <Link to="/moderation" className="home__moderation">
+              Moderation
+            </Link>
+          ) : null}
+          <button type="button" className="home__logout" onClick={handleLogout}>
+            Log out
+          </button>
+          <ThemeToggle />
+        </div>
       </header>
 
       <main className="home__main">
@@ -83,6 +105,23 @@ function HomePage() {
           </div>
         ) : null}
 
+        {!loading && !error && communities.length > 0 ? (
+          <>
+            <label className="home__search-label" htmlFor="community-search">
+              Search communities
+            </label>
+            <input
+              id="community-search"
+              type="search"
+              className="home__search"
+              value={communitySearchQuery}
+              onChange={(e) => setCommunitySearchQuery(e.target.value)}
+              placeholder="Filter by name or description…"
+              autoComplete="off"
+            />
+          </>
+        ) : null}
+
         {!loading && !error && communities.length === 0 ? (
           <div className="home__empty" role="status">
             <p className="home__empty-title">No communities found</p>
@@ -92,9 +131,16 @@ function HomePage() {
           </div>
         ) : null}
 
-        {!loading && communities.length > 0 ? (
+        {!loading && !error && communities.length > 0 && filteredCommunities.length === 0 ? (
+          <div className="home__empty" role="status">
+            <p className="home__empty-title">No communities found</p>
+            <p className="home__empty-desc">Try another search or clear the filter.</p>
+          </div>
+        ) : null}
+
+        {!loading && filteredCommunities.length > 0 ? (
           <ul className="home__list">
-            {communities.map((c) => (
+            {filteredCommunities.map((c) => (
               <li key={c.id}>
                 <Link to={`/c/${c.slug}`} className="home__card">
                   <h2 className="home__card-name">{c.name}</h2>

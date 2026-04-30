@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
@@ -19,6 +19,7 @@ function CommunityPage() {
   const [body, setBody] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [postSearchQuery, setPostSearchQuery] = useState('')
 
   const refreshPosts = useCallback(async (communityId) => {
     if (!communityId) return
@@ -44,6 +45,7 @@ function CommunityPage() {
   const loadCommunityAndPosts = useCallback(async () => {
     if (!slug) return
 
+    setPostSearchQuery('')
     setLoading(true)
     setLoadError('')
 
@@ -92,6 +94,60 @@ function CommunityPage() {
   useEffect(() => {
     loadCommunityAndPosts()
   }, [loadCommunityAndPosts])
+
+  useEffect(() => {
+    if (!community?.id) return undefined
+
+    const channel = supabase
+      .channel(`posts-community-${community.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'posts',
+          filter: `community_id=eq.${community.id}`,
+        },
+        async (payload) => {
+          const newId = payload.new?.id
+          if (!newId) return
+
+          const { data, error } = await supabase
+            .from('posts')
+            .select('id, title, body, created_at, author_id, profiles(display_name)')
+            .eq('id', newId)
+            .maybeSingle()
+
+          if (error) {
+            console.error('Realtime post fetch error:', error)
+            return
+          }
+          if (!data) return
+
+          setPosts((prev) => {
+            if (prev.some((p) => p.id === data.id)) return prev
+            const next = [...prev, data]
+            next.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            return next
+          })
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [community?.id])
+
+  const filteredPosts = useMemo(() => {
+    const q = postSearchQuery.trim().toLowerCase()
+    if (!q) return posts
+    return posts.filter((p) => {
+      const title = (p.title ?? '').toLowerCase()
+      const body = (p.body ?? '').toLowerCase()
+      return title.includes(q) || body.includes(q)
+    })
+  }, [posts, postSearchQuery])
 
   async function handleCreatePost(e) {
     e.preventDefault()
@@ -237,6 +293,19 @@ function CommunityPage() {
           <h2 id="feed-heading" className="community__section-title">
             Recent posts
           </h2>
+          <label className="community__label community__label--search" htmlFor="post-search">
+            Search posts
+          </label>
+          <input
+            id="post-search"
+            type="search"
+            className="community__input community__search"
+            value={postSearchQuery}
+            onChange={(e) => setPostSearchQuery(e.target.value)}
+            placeholder="Filter by title or message…"
+            autoComplete="off"
+            disabled={postsRefreshing}
+          />
           {postsRefreshing ? (
             <p className="community__inline-status" role="status" aria-live="polite">
               Updating posts…
@@ -248,9 +317,15 @@ function CommunityPage() {
               <p className="community__empty-desc">Start the conversation with a new post above.</p>
             </div>
           ) : null}
-          {posts.length > 0 ? (
+          {!loadError && !postsRefreshing && posts.length > 0 && filteredPosts.length === 0 ? (
+            <div className="community__empty" role="status">
+              <p className="community__empty-title">No posts found</p>
+              <p className="community__empty-desc">Try a different search or clear the filter.</p>
+            </div>
+          ) : null}
+          {filteredPosts.length > 0 ? (
             <ul className="community__posts">
-              {posts.map((post) => {
+              {filteredPosts.map((post) => {
                 const displayName = post.profiles?.display_name ?? 'Member'
                 const date = post.created_at
                   ? new Date(post.created_at).toLocaleString(undefined, {

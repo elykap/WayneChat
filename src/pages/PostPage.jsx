@@ -92,6 +92,50 @@ function PostPage() {
     loadPostAndReplies()
   }, [loadPostAndReplies])
 
+  useEffect(() => {
+    if (!post?.id || !postId) return undefined
+
+    const channel = supabase
+      .channel(`replies-post-${postId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'replies',
+          filter: `post_id=eq.${postId}`,
+        },
+        async (payload) => {
+          const newId = payload.new?.id
+          if (!newId) return
+
+          const { data, error } = await supabase
+            .from('replies')
+            .select('id, body, created_at, author_id, profiles(display_name)')
+            .eq('id', newId)
+            .maybeSingle()
+
+          if (error) {
+            console.error('Realtime reply fetch error:', error)
+            return
+          }
+          if (!data) return
+
+          setReplies((prev) => {
+            if (prev.some((r) => r.id === data.id)) return prev
+            const next = [...prev, data]
+            next.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            return next
+          })
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [post?.id, postId])
+
   async function handleReportPost() {
     if (!post?.id || !user || repliesBusy) return
     await submitReport(supabase, {
